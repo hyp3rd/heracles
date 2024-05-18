@@ -21,7 +21,7 @@ hook() {
     go_files=$(find "$root_dir" -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
 
     # run the pre-commit hook
-    pushd "$root_dir/src" || exit
+    pushd "$root_dir/v1" || exit
     __gofumpt "$go_files"
     __staticcheck ./...
     __lint "$go_files"
