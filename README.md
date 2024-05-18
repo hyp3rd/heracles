@@ -39,7 +39,7 @@ func main() {
     r := chi.NewRouter()
 
     // Create a new Prometheus middleware instance
-    promMiddleware, err := v1.NewMiddleware("my_service", v1.WithRequestsEnabled(true), v1.WithLatencyEnabled(true))
+    promMiddleware, err := heracles.NewMiddleware("my_service", heracles.WithRequestsEnabled(true), heracles.WithLatencyEnabled(true))
     if err != nil {
         panic(err)
     }
@@ -83,12 +83,12 @@ func main() {
     r := chi.NewRouter()
 
     // Create a new Prometheus middleware instance with custom options
-    promMiddleware, err := v1.NewMiddleware(
+    promMiddleware, err := heracles.NewMiddleware(
         "my_service",
-        v1.WithRequestsEnabled(true),
-        v1.WithLatencyEnabled(true),
-        v1.WithCustomLabels("X-Request-ID"),
-        v1.WithLatencyBuckets([]float64{0.1, 0.5, 1.0, 2.5, 5.0}),
+        heracles.WithRequestsEnabled(true),
+        heracles.WithLatencyEnabled(true),
+        heracles.WithCustomLabels("X-Request-ID"),
+        heracles.WithLatencyBuckets([]float64{0.1, 0.5, 1.0, 2.5, 5.0}),
     )
     if err != nil {
         panic(err)
