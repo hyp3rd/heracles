@@ -1,5 +1,7 @@
 # Heracles: a Prometheus Middleware for go-chi
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/hyp3rd/heracles.svg)](https://pkg.go.dev/github.com/hyp3rd/heracles) [![Go](https://github.com/hyp3rd/heracles/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/hyp3rd/heracles/actions/workflows/go.yml)
+
 _**Prometheus was freed by the hero Heracles.**_
 
 **Heracles** provides a Prometheus middleware for the [go-chi](https://github.com/go-chi/chi) router. It enables the collection of HTTP request metrics such as request counts, latencies, and detailed error metrics. The middleware is highly configurable using functional options.
