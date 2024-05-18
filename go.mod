@@ -1,4 +1,4 @@
-module githug.com/hyp3rd/heracles
+module github.com/hyp3rd/heracles
 
 go 1.22.3
 

@@ -19,7 +19,7 @@ _**Prometheus was freed by the hero Heracles.**_
 ## Installation
 
 ```bash
-go get githug.com/hyp3rd/heracles
+go get github.com/hyp3rd/heracles
 ```
 
 ## Usage
