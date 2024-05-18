@@ -26,7 +26,7 @@ func WithCustomLabels(customLabels ...string) MiddlewareOption {
 }
 
 // WithLatencyBuckets sets the buckets for the latency histogram.
-func WithLatencyBuckets(buckets []float64) MiddlewareOption {
+func WithLatencyBuckets(buckets ...float64) MiddlewareOption {
 	return func(m *Middleware) {
 		m.buckets = buckets
 	}
