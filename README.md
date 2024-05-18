@@ -8,15 +8,11 @@ _**Prometheus was freed by the hero Heracles.**_
 
 ## Features
 
-- Request Count Metrics: Track the number of HTTP requests partitioned by status code, method, and path.
-
-- Latency Metrics: Measure the latency of HTTP requests.
-
-- Detailed Error Metrics: Track detailed client and server error metrics.
-
-- Custom Labels: Add custom labels to metrics.
-
-- Configurable Buckets: Configure latency histogram buckets.
+- **Request Count Metrics**: Track the number of HTTP requests partitioned by status code, method, and path.
+- **Latency Metrics**: Measure the latency of HTTP requests.
+- **Detailed Error Metrics**: Track detailed client and server error metrics.
+- **Custom Labels**: Add custom labels to metrics.
+- **Configurable Buckets**: Configure latency histogram buckets.
 
 ## Installation
 
@@ -63,11 +59,8 @@ func main() {
 The Prometheus middleware can be configured using functional options. The following options are available:
 
 - `WithRequestsEnabled`: Enable request count metrics. Default: `true`.
-
 - `WithLatencyEnabled`: Enable latency metrics. Default: `true`.
-
 - `WithCustomLabels`: Add custom labels to metrics.
-
 - `WithLatencyBuckets`: Configure latency histogram buckets.
 
 ### Custom Configuration Usage
