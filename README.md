@@ -72,6 +72,8 @@ import (
     "net/http"
     "github.com/go-chi/chi/v5"
     "github.com/hyp3rd/heracles/v1"
+    "github.com/prometheus/client_golang/prometheus"
+    "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -89,6 +91,9 @@ func main() {
         panic(err)
     }
 
+    reg := prometheus.NewRegistry()
+    reg.MustRegister(promMiddleware.Collectors()...)
+
     // Register the middleware
     r.Use(promMiddleware.Handler)
 
@@ -96,6 +101,8 @@ func main() {
     r.Get("/", func(w http.ResponseWriter, r *http.Request) {
         w.Write([]byte("Hello, World!"))
     })
+
+    r.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
 
     http.ListenAndServe(":8080", r)
 }
