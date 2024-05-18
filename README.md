@@ -22,39 +22,7 @@ go get github.com/hyp3rd/heracles
 
 ## Usage
 
-```go
-package main
-
-import (
-    "net/http"
-    "time"
-
-    "github.com/go-chi/chi"
-    "github.com/hyp3rd/heracles/v1"
-)
-
-func main() {
-    r := chi.NewRouter()
-
-    // Create a new Prometheus middleware instance
-    promMiddleware, err := heracles.NewMiddleware("my_service", heracles.WithRequestsEnabled(true), heracles.WithLatencyEnabled(true))
-    if err != nil {
-        panic(err)
-    }
-
-    // Register the middleware
-    r.Use(promMiddleware.Handler)
-
-    // Define your routes
-    r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte("Hello, World!"))
-    })
-
-    http.ListenAndServe(":8080", r)
-}
-```
-
-## Configuration
+### Configuration
 
 The Prometheus middleware can be configured using functional options. The following options are available:
 
@@ -63,7 +31,7 @@ The Prometheus middleware can be configured using functional options. The follow
 - `WithCustomLabels`: Add custom labels to metrics.
 - `WithLatencyBuckets`: Configure latency histogram buckets.
 
-### Custom Configuration Usage
+### Example
 
 ```go
 package main
