@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+# #######################################
+# Install dependencies to run the pre-commit hook
+# #######################################
+install_dependencies() {
+	go install mvdan.cc/gofumpt@latest
+	go install honnef.co/go/tools/cmd/staticcheck@latest
+	go install -v golang.org/x/lint/golint@latest
+}
+
+# #######################################
+# Run the pre-commit
+# #######################################
+hook() {
+    # get the root of the project
+    local root_dir
+    root_dir=$(git rev-parse --show-toplevel)
+
+    local go_files
+    go_files=$(find "$root_dir" -type f -name '*.go' -not -path "./vendor/*" -not -path "./.git/*")
+
+    # run the pre-commit hook
+    pushd "$root_dir/src" || exit
+    __gofumpt "$go_files"
+    __staticcheck ./...
+    __lint "$go_files"
+    popd > /dev/null || exit
+}
+
+# #######################################
+# Run the linter
+# #######################################
+__lint() {
+    PASS=true
+    for FILE in "$@"
+    do
+        golint -set_exit_status "$FILE"
+        if [ "$?" -eq 1 ]; then
+            PASS=false
+        fi
+    done
+
+    if [ "$PASS" = "false" ]; then
+        exit 1
+    fi
+}
+
+# #######################################
+# Run the staticcheck
+# #######################################
+__staticcheck() {
+    for DIR in $(echo "$@"|xargs -n1 dirname|sort -u); do
+        golint ./"$DIR"
+    done
+}
+
+# #######################################
+# Run the gofumpt
+# #######################################
+__gofumpt() {
+    LIST_OF_FILES=$(gofumpt -l -w "$@")
+    # print a list of affected files if any
+    echo "$LIST_OF_FILES"
+    if [ -n "$LIST_OF_FILES" ];then
+        exit 1
+    fi
+}
+
+install_dependencies
+hook
