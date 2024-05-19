@@ -16,14 +16,14 @@ func TestWithCustomLabels(t *testing.T) {
 
 func TestWithRequestsEnabled(t *testing.T) {
 	m := &Middleware{}
-	WithRequestsEnabled(true)(m)
+	WithRequestsEnabled()(m)
 
 	assert.True(t, m.requestsEnabled)
 }
 
 func TestWithLatencyEnabled(t *testing.T) {
 	m := &Middleware{}
-	WithLatencyEnabled(true)(m)
+	WithLatencyEnabled()(m)
 
 	assert.True(t, m.latencyEnabled)
 }
