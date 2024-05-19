@@ -39,4 +39,4 @@ jobs:
         git config --local user.name "GitHub Action"
         git add coverage.svg
         git commit -m 'Add coverage badge'
-        git push
+        git push || echo "No changes to commit"
