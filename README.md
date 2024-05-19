@@ -1,6 +1,6 @@
 # Heracles: a Prometheus Middleware for go-chi
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/hyp3rd/heracles.svg)](https://pkg.go.dev/github.com/hyp3rd/heracles) [![Go](https://github.com/hyp3rd/heracles/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/hyp3rd/heracles/actions/workflows/go.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/hyp3rd/heracles)](https://goreportcard.com/report/github.com/hyp3rd/heracles) [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Go Reference](https://pkg.go.dev/badge/github.com/hyp3rd/heracles.svg)](https://pkg.go.dev/github.com/hyp3rd/heracles) [![Go](https://github.com/hyp3rd/heracles/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/hyp3rd/heracles/actions/workflows/go.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/hyp3rd/heracles)](https://goreportcard.com/report/github.com/hyp3rd/heracles)  ![coverage](./coverage.svg) [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)  ![coverage](./coverage.svg)
 
 _**Prometheus was freed by the hero Heracles.**_
 

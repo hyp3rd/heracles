@@ -28,18 +28,11 @@ jobs:
     - name: Test
       run: go test -coverprofile=coverage.out -v ./...
 
-    - name: Setup python
-      uses: actions/setup-python@v1
-
-    - name: Install pip dependencies
-      uses: BSFishy/pip-action@v1
-      with:
-        packages: |
-          coverage-badge
-    - name: Generate coverage badge
+    - name: Parse coverage report
+      id: coverage
       run: |
-        coverage-badge -o coverage.svg -i coverage.out
-      shell: python
+        COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+        curl -s -o coverage.svg "https://img.shields.io/badge/coverage-$COVERAGE%25-brightgreen"
 
     - name: Commit coverage badge
       run: |
