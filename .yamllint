@@ -10,4 +10,4 @@ rules:
   line-length: disable
   truthy: disable
 ignore: |
-  src/specs.yaml
+  .github/workflows/*.yml

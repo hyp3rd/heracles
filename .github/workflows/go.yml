@@ -1,3 +1,4 @@
+---
 # This workflow will build a golang project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
 
@@ -25,4 +26,20 @@ jobs:
       run: go build -v ./...
 
     - name: Test
-      run: go test -v ./...
+      run: go test -coverprofile=coverage.out -v ./...
+
+    - name: Convert coverage to badge
+      run: |
+        pip install coverage-badge
+        coverage-badge -o coverage.svg -i coverage.out
+      shell: python
+
+    - name: Commit coverage badge
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add coverage.svg
+        git commit -m 'Add coverage badge'
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
