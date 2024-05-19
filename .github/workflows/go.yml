@@ -38,7 +38,6 @@ jobs:
           coverage-badge
     - name: Generate coverage badge
       run: |
-        pip install coverage-badge
         coverage-badge -o coverage.svg -i coverage.out
       shell: python
 
