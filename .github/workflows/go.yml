@@ -30,14 +30,11 @@ jobs:
     - name: Test
       run: go test -coverprofile=coverage.out -v ./...
 
-    - name: Parse coverage report
+    - name: Parse coverage report and commit it
       id: coverage
       run: |
         COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
         curl -s -o coverage.svg "https://img.shields.io/badge/coverage-$COVERAGE%25-brightgreen"
-
-    - name: Commit coverage badge
-      run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add coverage.svg
