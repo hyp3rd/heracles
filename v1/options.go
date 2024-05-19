@@ -4,16 +4,16 @@ package heracles
 type MiddlewareOption func(*Middleware)
 
 // WithRequestsEnabled sets the requestsEnabled field of the middleware.
-func WithRequestsEnabled() MiddlewareOption {
+func WithRequestsEnabled(enabled bool) MiddlewareOption {
 	return func(m *Middleware) {
-		m.requestsEnabled = true
+		m.requestsEnabled = enabled
 	}
 }
 
 // WithLatencyEnabled sets the latencyEnabled field of the middleware.
-func WithLatencyEnabled() MiddlewareOption {
+func WithLatencyEnabled(enabled bool) MiddlewareOption {
 	return func(m *Middleware) {
-		m.latencyEnabled = true
+		m.latencyEnabled = enabled
 	}
 }
 
@@ -29,5 +29,19 @@ func WithCustomLabels(customLabels ...string) MiddlewareOption {
 func WithLatencyBuckets(buckets ...float64) MiddlewareOption {
 	return func(m *Middleware) {
 		m.buckets = buckets
+	}
+}
+
+// WithRequestSizeEnabled sets the requestSizeEnabled field of the middleware.
+func WithRequestSizeEnabled(enabled bool) MiddlewareOption {
+	return func(m *Middleware) {
+		m.requestSizeEnabled = enabled
+	}
+}
+
+// WithResponseSizeEnabled sets the responseSizeEnabled field of the middleware.
+func WithResponseSizeEnabled(enabled bool) MiddlewareOption {
+	return func(m *Middleware) {
+		m.responseSizeEnabled = enabled
 	}
 }

@@ -15,19 +15,26 @@ var defaultBucketsConfig = []float64{0.3, 1.2, 5.0}
 
 // Constants for collector names.
 const (
-	RequestsCollectorName = "chi_requests_total"
-	LatencyCollectorName  = "chi_request_duration_seconds"
+	RequestsCollectorName       = "chi_requests_total"
+	LatencyCollectorName        = "chi_request_duration_seconds"
+	DetailedErrorsCollectorName = "chi_detailed_errors_total"
+	RequestSizeCollectorName    = "chi_request_size_bytes"
+	ResponseSizeCollectorName   = "chi_response_size_bytes"
 )
 
 // Middleware is a handler that exposes prometheus metrics.
 type Middleware struct {
-	buckets            []float64
-	requestsEnabled    bool
-	latencyEnabled     bool
-	requests           *prometheus.CounterVec
-	latency            *prometheus.HistogramVec
-	customLabels       []string
-	detailedErrorCount *prometheus.CounterVec
+	buckets             []float64
+	requestsEnabled     bool
+	latencyEnabled      bool
+	requestSizeEnabled  bool
+	responseSizeEnabled bool
+	requests            *prometheus.CounterVec
+	latency             *prometheus.HistogramVec
+	requestSize         *prometheus.SummaryVec
+	responseSize        *prometheus.SummaryVec
+	customLabels        []string
+	detailedErrorCount  *prometheus.CounterVec
 }
 
 // NewMiddleware creates a new instance of the Heracles Middleware with the specified name and options.
@@ -45,7 +52,7 @@ type Middleware struct {
 //
 // Example usage:
 //
-//	middleware, err := NewMiddleware("my-service", WithRequestsEnabled(), WithLatencyEnabled())
+//	middleware, err := NewMiddleware("my-service", WithRequestsEnabled(true), WithLatencyEnabled(false))
 //	if err != nil {
 //	    // Handle error
 //	}
@@ -55,6 +62,10 @@ func NewMiddleware(name string, opts ...MiddlewareOption) (*Middleware, error) {
 	for _, opt := range opts {
 		opt(m)
 	}
+
+	// if !m.latencyEnabled && !m.requestsEnabled {
+	// 	return nil, errors.New("at least one of latency or requests must be enabled")
+	// }
 
 	if len(m.buckets) == 0 {
 		m.buckets = defaultBucketsConfig
@@ -71,8 +82,8 @@ func NewMiddleware(name string, opts ...MiddlewareOption) (*Middleware, error) {
 			}, labelNames)
 		m.detailedErrorCount = prometheus.NewCounterVec(
 			prometheus.CounterOpts{
-				Name:        "chi_detailed_errors_total",
-				Help:        "Detailed error counts partitioned by type, status code, method, and HTTP path.",
+				Name:        DetailedErrorsCollectorName,
+				Help:        "Detailed error counts partitioned by type, status code, method and HTTP path.",
 				ConstLabels: prometheus.Labels{"service": name},
 			}, []string{"type", "code", "method", "path"})
 	}
@@ -83,6 +94,22 @@ func NewMiddleware(name string, opts ...MiddlewareOption) (*Middleware, error) {
 			Help:        "Time spent on the request partitioned by status code, method and HTTP path.",
 			ConstLabels: prometheus.Labels{"service": name},
 			Buckets:     m.buckets,
+		}, labelNames)
+	}
+
+	if m.requestSizeEnabled {
+		m.requestSize = prometheus.NewSummaryVec(prometheus.SummaryOpts{
+			Name:        RequestSizeCollectorName,
+			Help:        "Size of HTTP requests in bytes.",
+			ConstLabels: prometheus.Labels{"service": name},
+		}, labelNames)
+	}
+
+	if m.responseSizeEnabled {
+		m.responseSize = prometheus.NewSummaryVec(prometheus.SummaryOpts{
+			Name:        ResponseSizeCollectorName,
+			Help:        "Size of HTTP responses in bytes.",
+			ConstLabels: prometheus.Labels{"service": name},
 		}, labelNames)
 	}
 
@@ -121,6 +148,14 @@ func (m *Middleware) recordMetrics(ww middleware.WrapResponseWriter, r *http.Req
 		m.latency.WithLabelValues(labels...).Observe(duration)
 	}
 
+	if m.requestSizeEnabled {
+		m.requestSize.WithLabelValues(labels...).Observe(float64(r.ContentLength))
+	}
+
+	if m.responseSizeEnabled {
+		m.responseSize.WithLabelValues(labels...).Observe(float64(ww.BytesWritten()))
+	}
+
 	if m.requestsEnabled && ww.Status() >= 400 {
 		errorType := "client_error"
 		if ww.Status() >= 500 {
@@ -148,12 +183,18 @@ func (m *Middleware) Collectors() []prometheus.Collector {
 	if m.latencyEnabled {
 		collectors = append(collectors, m.latency)
 	}
+	if m.requestSizeEnabled {
+		collectors = append(collectors, m.requestSize)
+	}
+	if m.responseSizeEnabled {
+		collectors = append(collectors, m.responseSize)
+	}
 	return collectors
 }
 
 // MustRegisterDefault registers collectors to DefaultRegisterer.
 func (m *Middleware) MustRegisterDefault() {
-	if m.requests == nil && m.latency == nil {
+	if len(m.Collectors()) == 0 {
 		panic("collectors must be set")
 	}
 	prometheus.MustRegister(m.Collectors()...)

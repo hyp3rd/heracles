@@ -11,6 +11,8 @@ _**Prometheus was freed by the hero Heracles.**_
 - **Request Count Metrics**: Track the number of HTTP requests partitioned by status code, method, and path.
 - **Latency Metrics**: Measure the latency of HTTP requests.
 - **Detailed Error Metrics**: Track detailed client and server error metrics.
+- **Request Size Metrics**: Collect request size metrics.
+- **Response Size Metrics**: Collect response size metrics.
 - **Custom Labels**: Add custom labels to metrics.
 - **Configurable Buckets**: Configure latency histogram buckets.
 
@@ -26,10 +28,12 @@ go get github.com/hyp3rd/heracles
 
 The Prometheus middleware can be configured using functional options. The following options are available:
 
-- `WithRequestsEnabled`: Enable request count metrics. Default: `true`.
-- `WithLatencyEnabled`: Enable latency metrics. Default: `true`.
+- `WithRequestsEnabled`: Enable request count metrics. Default: `false`.
+- `WithLatencyEnabled`: Enable latency metrics. Default: `false`.
 - `WithCustomLabels`: Add custom labels to metrics.
 - `WithLatencyBuckets`: Configure latency histogram buckets.
+- `WithRequestSizeEnabled`: Enable the collection of request size metrics. Default: `false`.
+- `WithResponseSizeEnabled`: Enable the collection of response size metrics. Default: `false`.
 
 ### Example
 
@@ -50,8 +54,8 @@ func main() {
     // Create a new Prometheus middleware instance with custom options
     promMiddleware, err := heracles.NewMiddleware(
         "my_service",
-        heracles.WithRequestsEnabled(true),
-        heracles.WithLatencyEnabled(true),
+        heracles.WithRequestsEnabled(),
+        heracles.WithLatencyEnabled(),
         heracles.WithCustomLabels("X-Request-ID"),
         heracles.WithLatencyBuckets([]float64{0.1, 0.5, 1.0, 2.5, 5.0}),
     )

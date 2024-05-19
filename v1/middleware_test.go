@@ -14,21 +14,21 @@ import (
 
 // TestNewMiddleware tests the creation of middleware with different options.
 func TestNewMiddleware(t *testing.T) {
-	m, err := NewMiddleware("test_service", WithRequestsEnabled(), WithLatencyEnabled())
-	assert.NoError(t, err)
-	assert.NotNil(t, m.requests)
-	assert.NotNil(t, m.latency)
-
-	m, err = NewMiddleware("test_service")
+	m, err := NewMiddleware("test_service", WithRequestsEnabled(false), WithLatencyEnabled(false))
 	assert.NoError(t, err)
 	assert.Nil(t, m.requests)
 	assert.Nil(t, m.latency)
+
+	m, err = NewMiddleware("test_service", WithRequestsEnabled(true), WithLatencyEnabled(true))
+	assert.NoError(t, err)
+	assert.NotNil(t, m.requests)
+	assert.NotNil(t, m.latency)
 }
 
 // TestMiddlewareHandler tests the middleware handler to ensure metrics are recorded.
 func TestMiddlewareHandler(t *testing.T) {
 	reg := prometheus.NewRegistry()
-	m, err := NewMiddleware("test_service", WithRequestsEnabled(), WithLatencyEnabled())
+	m, err := NewMiddleware("test_service", WithRequestsEnabled(true), WithLatencyEnabled(true), WithRequestSizeEnabled(true), WithResponseSizeEnabled(true))
 	assert.NoError(t, err)
 
 	reg.MustRegister(m.Collectors()...)
@@ -39,7 +39,7 @@ func TestMiddlewareHandler(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest("GET", "/", strings.NewReader("test request body"))
 	w := httptest.NewRecorder()
 
 	r.ServeHTTP(w, req)
@@ -59,18 +59,36 @@ func TestMiddlewareHandler(t *testing.T) {
 		chi_request_duration_seconds_bucket{code="200",method="GET",path="/",service="test_service",le="+Inf"} 1
 		chi_request_duration_seconds_count{code="200",method="GET",path="/",service="test_service"} 1
 	`
+	expectedRequestSize := `
+		# HELP chi_request_size_bytes Size of HTTP requests in bytes.
+		# TYPE chi_request_size_bytes summary
+		chi_request_size_bytes_sum{code="200",method="GET",path="/",service="test_service"} 17
+		chi_request_size_bytes_count{code="200",method="GET",path="/",service="test_service"} 1
+	`
+	expectedResponseSize := `
+		# HELP chi_response_size_bytes Size of HTTP responses in bytes.
+		# TYPE chi_response_size_bytes summary
+		chi_response_size_bytes_sum{code="200",method="GET",path="/",service="test_service"} 0
+		chi_response_size_bytes_count{code="200",method="GET",path="/",service="test_service"} 1
+	`
 
 	err = testutil.CollectAndCompare(m.requests, strings.NewReader(expectedRequests))
 	assert.NoError(t, err)
 
 	err = testutil.CollectAndCompare(m.latency, strings.NewReader(expectedLatency), "chi_request_duration_seconds_bucket", "chi_request_duration_seconds_count")
 	assert.NoError(t, err)
+
+	err = testutil.CollectAndCompare(m.requestSize, strings.NewReader(expectedRequestSize))
+	assert.NoError(t, err)
+
+	err = testutil.CollectAndCompare(m.responseSize, strings.NewReader(expectedResponseSize))
+	assert.NoError(t, err)
 }
 
 // TestDetailedErrorMetrics tests the recording of detailed error metrics.
 func TestDetailedErrorMetrics(t *testing.T) {
 	reg := prometheus.NewRegistry()
-	m, err := NewMiddleware("test_service", WithRequestsEnabled())
+	m, err := NewMiddleware("test_service", WithRequestsEnabled(true))
 	assert.NoError(t, err)
 
 	reg.MustRegister(m.Collectors()...)
@@ -95,7 +113,7 @@ func TestDetailedErrorMetrics(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 
 	expectedDetailedErrors := `
-		# HELP chi_detailed_errors_total Detailed error counts partitioned by type, status code, method, and HTTP path.
+		# HELP chi_detailed_errors_total Detailed error counts partitioned by type, status code, method and HTTP path.
 		# TYPE chi_detailed_errors_total counter
 		chi_detailed_errors_total{code="400",method="GET",path="/client_error",service="test_service",type="client_error"} 1
 		chi_detailed_errors_total{code="500",method="GET",path="/server_error",service="test_service",type="server_error"} 1
@@ -107,7 +125,7 @@ func TestDetailedErrorMetrics(t *testing.T) {
 // TestCustomLabels tests the middleware with custom labels.
 func TestCustomLabels(t *testing.T) {
 	reg := prometheus.NewRegistry()
-	m, err := NewMiddleware("test_service", WithRequestsEnabled(), WithLatencyEnabled(), WithCustomLabels("X_Custom_Header"))
+	m, err := NewMiddleware("test_service", WithRequestsEnabled(true), WithLatencyEnabled(true), WithCustomLabels("X_Custom_Header"))
 	assert.NoError(t, err)
 
 	reg.MustRegister(m.Collectors()...)
