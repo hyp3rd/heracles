@@ -38,5 +38,5 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add coverage.svg
-        git commit -m 'Add coverage badge'
-        git push || exit 1
+        git diff-index --quiet HEAD || git commit -m 'Add coverage badge'
+        git push
