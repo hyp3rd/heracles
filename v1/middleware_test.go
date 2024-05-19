@@ -15,9 +15,8 @@ import (
 // TestNewMiddleware tests the creation of middleware with different options.
 func TestNewMiddleware(t *testing.T) {
 	m, err := NewMiddleware("test_service")
-	assert.NoError(t, err)
-	assert.Nil(t, m.requests)
-	assert.Nil(t, m.latency)
+	assert.Error(t, err)
+	assert.ErrorIs(t, err, ErrNoMetricsEnabled)
 
 	m, err = NewMiddleware("test_service", WithRequestsEnabled(), WithLatencyEnabled())
 	assert.NoError(t, err)

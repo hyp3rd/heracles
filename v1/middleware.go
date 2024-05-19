@@ -1,6 +1,7 @@
 package heracles
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -11,7 +12,11 @@ import (
 )
 
 // Default buckets for latency metrics.
-var defaultBucketsConfig = []float64{0.3, 1.2, 5.0}
+var (
+	defaultBucketsConfig = []float64{0.3, 1.2, 5.0}
+	// ErrNoMetricsEnabled is returned when no metrics are enabled.
+	ErrNoMetricsEnabled = errors.New("at least one of latency, requests, request size or response size must be enabled")
+)
 
 // Constants for collector names.
 const (
@@ -37,6 +42,15 @@ type Middleware struct {
 	detailedErrorCount  *prometheus.CounterVec
 }
 
+// validateOptions validates the options provided to the middleware.
+func (m *Middleware) validateOptions() bool {
+	if !m.latencyEnabled && !m.requestsEnabled && !m.requestSizeEnabled && !m.responseSizeEnabled {
+		return false
+	}
+
+	return true
+}
+
 // NewMiddleware creates a new instance of the Heracles Middleware with the specified name and options.
 // The function initializes the Middleware struct with the provided options and sets default values for
 // the buckets configuration if it is not provided. It also creates Prometheus metrics for tracking
@@ -52,7 +66,7 @@ type Middleware struct {
 //
 // Example usage:
 //
-//	middleware, err := NewMiddleware("my-service", WithRequestsEnabled(true), WithLatencyEnabled(false))
+//	middleware, err := NewMiddleware("my-service", WithRequestsEnabled(), WithLatencyEnabled())
 //	if err != nil {
 //	    // Handle error
 //	}
@@ -63,9 +77,9 @@ func NewMiddleware(name string, opts ...MiddlewareOption) (*Middleware, error) {
 		opt(m)
 	}
 
-	// if !m.latencyEnabled && !m.requestsEnabled {
-	// 	return nil, errors.New("at least one of latency or requests must be enabled")
-	// }
+	if !m.validateOptions() {
+		return nil, ErrNoMetricsEnabled
+	}
 
 	if len(m.buckets) == 0 {
 		m.buckets = defaultBucketsConfig
