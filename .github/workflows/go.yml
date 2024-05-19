@@ -28,7 +28,15 @@ jobs:
     - name: Test
       run: go test -coverprofile=coverage.out -v ./...
 
-    - name: Convert coverage to badge
+    - name: Setup python
+      uses: actions/setup-python@v1
+
+    - name: Install pip dependencies
+      uses: BSFishy/pip-action@v1
+      with:
+        packages: |
+          coverage-badge
+    - name: Generate coverage badge
       run: |
         pip install coverage-badge
         coverage-badge -o coverage.svg -i coverage.out
@@ -36,8 +44,8 @@ jobs:
 
     - name: Commit coverage badge
       run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
         git add coverage.svg
         git commit -m 'Add coverage badge'
         git push
