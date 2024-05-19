@@ -163,3 +163,30 @@ func TestCustomLabels(t *testing.T) {
 	err = testutil.CollectAndCompare(m.latency, strings.NewReader(expectedLatency), "chi_request_duration_seconds_bucket", "chi_request_duration_seconds_count")
 	assert.NoError(t, err)
 }
+
+func TestMiddlewareCollectors(t *testing.T) {
+	m, err := NewMiddleware("test_service", WithRequestsEnabled(), WithLatencyEnabled())
+	assert.NoError(t, err)
+
+	collectors := m.Collectors()
+	assert.Len(t, collectors, 3)
+}
+
+func TestMustRegisterDefault(t *testing.T) {
+	m, err := NewMiddleware("test_service", WithRequestsEnabled(), WithLatencyEnabled())
+	assert.NoError(t, err)
+	m.MustRegisterDefault()
+	assert.NotNil(t, m.requests)
+	assert.NotNil(t, m.latency)
+}
+
+func TestCollectLabels(t *testing.T) {
+	m, err := NewMiddleware("test_service", WithRequestsEnabled(), WithLatencyEnabled())
+	assert.NoError(t, err)
+
+	r := httptest.NewRequest("GET", "/", nil)
+
+	labels := m.collectLabels(r, "200", "/")
+	t.Logf("labels %s", labels)
+	assert.Equal(t, []string{"200", "GET", "/"}, labels)
+}
