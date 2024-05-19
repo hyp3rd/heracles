@@ -14,12 +14,12 @@ import (
 
 // TestNewMiddleware tests the creation of middleware with different options.
 func TestNewMiddleware(t *testing.T) {
-	m, err := NewMiddleware("test_service", WithRequestsEnabled(false), WithLatencyEnabled(false))
+	m, err := NewMiddleware("test_service")
 	assert.NoError(t, err)
 	assert.Nil(t, m.requests)
 	assert.Nil(t, m.latency)
 
-	m, err = NewMiddleware("test_service", WithRequestsEnabled(true), WithLatencyEnabled(true))
+	m, err = NewMiddleware("test_service", WithRequestsEnabled(), WithLatencyEnabled())
 	assert.NoError(t, err)
 	assert.NotNil(t, m.requests)
 	assert.NotNil(t, m.latency)
@@ -28,7 +28,7 @@ func TestNewMiddleware(t *testing.T) {
 // TestMiddlewareHandler tests the middleware handler to ensure metrics are recorded.
 func TestMiddlewareHandler(t *testing.T) {
 	reg := prometheus.NewRegistry()
-	m, err := NewMiddleware("test_service", WithRequestsEnabled(true), WithLatencyEnabled(true), WithRequestSizeEnabled(true), WithResponseSizeEnabled(true))
+	m, err := NewMiddleware("test_service", WithRequestsEnabled(), WithLatencyEnabled(), WithRequestSizeEnabled(), WithResponseSizeEnabled())
 	assert.NoError(t, err)
 
 	reg.MustRegister(m.Collectors()...)
@@ -88,7 +88,7 @@ func TestMiddlewareHandler(t *testing.T) {
 // TestDetailedErrorMetrics tests the recording of detailed error metrics.
 func TestDetailedErrorMetrics(t *testing.T) {
 	reg := prometheus.NewRegistry()
-	m, err := NewMiddleware("test_service", WithRequestsEnabled(true))
+	m, err := NewMiddleware("test_service", WithRequestsEnabled())
 	assert.NoError(t, err)
 
 	reg.MustRegister(m.Collectors()...)
@@ -125,7 +125,7 @@ func TestDetailedErrorMetrics(t *testing.T) {
 // TestCustomLabels tests the middleware with custom labels.
 func TestCustomLabels(t *testing.T) {
 	reg := prometheus.NewRegistry()
-	m, err := NewMiddleware("test_service", WithRequestsEnabled(true), WithLatencyEnabled(true), WithCustomLabels("X_Custom_Header"))
+	m, err := NewMiddleware("test_service", WithRequestsEnabled(), WithLatencyEnabled(), WithCustomLabels("X_Custom_Header"))
 	assert.NoError(t, err)
 
 	reg.MustRegister(m.Collectors()...)

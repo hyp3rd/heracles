@@ -16,14 +16,14 @@ func TestWithCustomLabels(t *testing.T) {
 
 func TestWithRequestsEnabled(t *testing.T) {
 	m := &Middleware{}
-	WithRequestsEnabled(true)(m)
+	WithRequestsEnabled()(m)
 
 	assert.True(t, m.requestsEnabled)
 }
 
 func TestWithLatencyEnabled(t *testing.T) {
 	m := &Middleware{}
-	WithLatencyEnabled(true)(m)
+	WithLatencyEnabled()(m)
 
 	assert.True(t, m.latencyEnabled)
 }
@@ -38,14 +38,14 @@ func TestWithBuckets(t *testing.T) {
 
 func TestWithRequestSizeEnabled(t *testing.T) {
 	m := &Middleware{}
-	WithRequestSizeEnabled(true)(m)
+	WithRequestSizeEnabled()(m)
 
 	assert.True(t, m.requestSizeEnabled)
 }
 
 func TestWithResponseSizeEnabled(t *testing.T) {
 	m := &Middleware{}
-	WithResponseSizeEnabled(true)(m)
+	WithResponseSizeEnabled()(m)
 
 	assert.True(t, m.responseSizeEnabled)
 }
