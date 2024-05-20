@@ -185,8 +185,7 @@ func TestCollectLabels(t *testing.T) {
 	assert.NoError(t, err)
 
 	r := httptest.NewRequest("GET", "/", nil)
-
 	labels := m.collectLabels(r, "200", "/")
-	t.Logf("labels %s", labels)
+
 	assert.Equal(t, []string{"200", "GET", "/"}, labels)
 }
